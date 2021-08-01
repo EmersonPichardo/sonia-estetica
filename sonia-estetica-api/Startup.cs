@@ -1,16 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using sonia_estetica_dataAccess.Connections;
 
 namespace sonia_estetica_api
 {
@@ -26,8 +21,18 @@ namespace sonia_estetica_api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string benesserConnectionStr = Configuration.GetConnectionString("BenesserConnection");
+            string securityConnectionStr = Configuration.GetConnectionString("SecurityConnection");
+
+            services.AddDbContextPool<BenesserContext>(options =>
+                options.UseMySql(benesserConnectionStr, ServerVersion.AutoDetect(benesserConnectionStr))
+            );
+            services.AddDbContextPool<SecurityContext>(options =>
+                options.UseMySql(securityConnectionStr, ServerVersion.AutoDetect(securityConnectionStr))
+            );
 
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "sonia_estetica_api", Version = "v1" });
